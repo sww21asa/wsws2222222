@@ -19,6 +19,8 @@ Window:AddMinimizeButton({
 
 local FREIRAKKJ = Window:MakeTab({ "Extra", "wand" })
 
+FREIRAKKJ:AddSection({Name = "ENCONTRE A FREIRA PRA FUNCIONAR CORRETAMENTE!!"})
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
