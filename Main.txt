@@ -1,0 +1,144 @@
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/ffddfgxhyydhd-afk/white/refs/heads/main/Main.txt"))()
+
+local Window = redzlib:MakeWindow({
+    Title = "Mystery Hub「 BrookHaven 」",
+    SubTitle = "Criador BytexWolfx",
+    SaveFolder = "MysteryHub"
+})
+
+Window:AddMinimizeButton({
+    Button = { 
+        Image = "rbxassetid://97272394499002", 
+        BackgroundTransparency = 0, 
+        Size = UDim2.new(0, 45, 0, 45)
+    },
+    Corner = { 
+        CornerRadius = UDim.new(0, 100)
+    },
+})
+
+local FREIRAKKJ = Window:MakeTab({ "Extra", "wand" })
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local SelectedTarget = nil
+
+local function getPlayersList()
+    local list = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(list, player.Name)
+        end
+    end
+    return list
+end
+
+local PlayerDropdown = FREIRAKKJ:AddDropdown({
+    Name = "Selecionar jogador",
+    Options = getPlayersList(),
+    Default = "",
+    Callback = function(value)
+        SelectedTarget = value
+    end
+})
+
+local function atualizarDropdown()
+    if not PlayerDropdown then return end
+    
+    local newPlayers = getPlayersList()
+    PlayerDropdown:Refresh(newPlayers)
+
+    if SelectedTarget and table.find(newPlayers, SelectedTarget) then
+        PlayerDropdown:Set(SelectedTarget)
+    else
+        SelectedTarget = nil
+    end
+end
+
+Players.PlayerAdded:Connect(function()
+    task.wait(0.5)
+    atualizarDropdown()
+end)
+
+Players.PlayerRemoving:Connect(function()
+    task.wait(0.5)
+    atualizarDropdown()
+end)
+
+task.spawn(function()
+    while task.wait(5) do
+        atualizarDropdown()
+    end
+end)
+
+FREIRAKKJ:AddButton({
+    Name = "Teleportar A Freira para Jogador",
+    Callback = function()
+        if not SelectedTarget then
+            return
+        end
+        
+        local player = Players:FindFirstChild(SelectedTarget)
+        local ai = workspace:FindFirstChild("AI")
+
+        if not player then
+            return
+        end
+
+        if not ai then
+            return
+        end
+
+        local character = player.Character or player.CharacterAdded:Wait()
+
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        local aiRoot = ai:FindFirstChild("HumanoidRootPart") or ai:FindFirstChildWhichIsA("BasePart")
+
+        if hrp and aiRoot then
+            aiRoot.CFrame = hrp.CFrame * CFrame.new(6, 0, 0)
+        end
+    end
+})
+
+local teleportLoop = false
+
+FREIRAKKJ:AddToggle({
+    Name = "Teleportar a Freira no player (em Loop)",
+    Default = false,
+    Callback = function(state)
+        teleportLoop = state
+
+        if teleportLoop then
+            task.spawn(function()
+                while teleportLoop do
+                    task.wait(0.1)
+
+                    if not SelectedTarget then
+                        continue
+                    end
+                    
+                    local player = Players:FindFirstChild(SelectedTarget)
+                    local ai = workspace:FindFirstChild("AI")
+
+                    if not player or not ai then
+                        continue
+                    end
+
+                    local character = player.Character
+                    if not character then
+                        continue
+                    end
+
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    local aiRoot = ai:FindFirstChild("HumanoidRootPart") or ai:FindFirstChildWhichIsA("BasePart")
+
+                    if hrp and aiRoot then
+                        aiRoot.CFrame = hrp.CFrame
+                        aiRoot.Velocity = Vector3.zero
+                    end
+                end
+            end)
+        end
+    end
+})
